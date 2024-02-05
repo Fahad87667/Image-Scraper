@@ -1,0 +1,31 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bing Image Scraper</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Bing Image Scraper</h1>
+      <form method="post">
+        <label for="search_term">Search Term:</label>
+        <input type="text" name="search_term" required />
+        <br />
+        <label for="driver_path">Driver Path:</label>
+        <input type="text" name="driver_path" required />
+        <br />
+        <label for="number_images">Number of Images:</label>
+        <input type="number" name="number_images" value="10" required />
+        <br />
+        <button type="submit">Search and Download</button>
+      </form>
+    </div>
+  </body>
+</html>
