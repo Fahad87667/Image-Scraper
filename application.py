@@ -4,6 +4,7 @@ import os
 import time
 import requests
 
+
 app = Flask(__name__)
 
 def fetch_image_urls_bing(query: str, max_links_to_fetch: int, wd: webdriver, sleep_between_interactions: int = 1):
