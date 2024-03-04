@@ -81,7 +81,7 @@ def search_and_display(search_term: str, driver_path: str, number_images=10, num
         st.success("Thanks for exploring images!")
     
 def main():
-    st.title("Images Explorer")
+    st.title("ImageGalaxy Pro")
 
     search_term = st.text_input("Enter the search term:")
     number_images = st.slider("Number of Images to Display", 1, 50, 10)
