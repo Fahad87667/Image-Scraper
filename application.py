@@ -1,10 +1,10 @@
-import streamlit as st
+from flask import Flask, render_template, request
 from selenium import webdriver
 import os
 import time
 import requests
-from PIL import Image
-from io import BytesIO
+
+app = Flask(__name__)
 
 def fetch_image_urls_bing(query: str, max_links_to_fetch: int, wd: webdriver, sleep_between_interactions: int = 1):
     def scroll_to_end(wd):
@@ -46,51 +46,48 @@ def fetch_image_urls_bing(query: str, max_links_to_fetch: int, wd: webdriver, sl
 
     return image_urls
 
-def persist_image(folder_path: str, url: str, counter, num_columns):
+def persist_image(folder_path: str, url: str, counter):
     try:
         image_content = requests.get(url).content
     except Exception as e:
         print(f"ERROR - Could not download {url} - {e}")
 
     try:
-        img = Image.open(BytesIO(image_content))
-
-        # Display images in columns
-        columns = st.columns(num_columns)
-        column_index = counter % num_columns
-        columns[column_index].image(img, caption=f"Image {counter}", use_column_width=True)
-        print(f"SUCCESS - displayed {url}")
+        f = open(os.path.join(folder_path, f"img_{counter}.jpg"), 'wb')
+        f.write(image_content)
+        f.close()
+        print(f"SUCCESS - saved {url} - as {folder_path}")
     except Exception as e:
-        print(f"ERROR - Could not display {url} - {e}")
+        print(f"ERROR - Could not save {url} - {e}")
 
-def search_and_display(search_term: str, driver_path: str, number_images=10, num_columns=3):
-    st.title("Downloading Images.....")
+def search_and_download(search_term: str, driver_path: str, number_images=10):
+    target_folder = os.path.join('./images', '_'.join(search_term.lower().split(' ')))
+
+    if not os.path.exists(target_folder):
+        os.makedirs(target_folder)
 
     edge_options = webdriver.EdgeOptions()
     edge_options.use_chromium = True
 
-    with webdriver.Edge(options=edge_options) as wd:
+    with webdriver.Edge(options=edge_options, executable_path=driver_path) as wd:
         res = fetch_image_urls_bing(search_term, number_images, wd=wd, sleep_between_interactions=0.5)
 
     if res:
         counter = 0
         for elem in res:
-            persist_image(search_term, elem, counter, num_columns)
+            persist_image(target_folder, elem, counter)
             counter += 1
 
-        st.success("Thanks for exploring images!")
-    
-def main():
-    st.title("Images Explorer")
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        search_term = request.form['search_term']
+        driver_path = request.form['driver_path']
+        number_images = int(request.form['number_images'])
 
-    search_term = st.text_input("Enter the search term:")
-    number_images = st.slider("Number of Images to Display", 1, 50, 10)
-    num_columns = st.slider("Number of Columns", 1, 5, 3)
+        search_and_download(search_term, driver_path, number_images=number_images)
 
-    if st.button("Display Images"):
-        search_and_display(search_term, "./msedgedriver.exe", number_images=number_images, num_columns=num_columns)
-
-    # Add a simple footer with a link to the source code repository
+    return render_template('index.html')
 
 if __name__ == '__main__':
-    main()
+    app.run(debug=False)

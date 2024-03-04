@@ -1,3 +1,4 @@
-Flask==2.2.5
-selenium==4.6.0
-requests==2.31.0
+Flask
+selenium
+requests
+streamlit
